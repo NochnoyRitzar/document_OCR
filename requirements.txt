@@ -4,3 +4,5 @@ pillow
 numpy
 jupyter
 paddleocr==2.7.3
+paddlepaddle
+streamlit

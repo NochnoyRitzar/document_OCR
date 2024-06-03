@@ -8,7 +8,7 @@ wget -P pretrained_models/ https://paddleocr.bj.bcebos.com/PP-OCRv4/english/en_P
 # Extract the downloaded files and clean up
 cd ./pretrained_models
 tar -xf en_PP-OCRv3_det_distill_train.tar && rm -rf en_PP-OCRv3_det_distill_train.tar
-tar -xf en_PP-OCRv3_det_distill_train.tar && rm -rf en_PP-OCRv3_det_distill_train.tar
+tar -xf en_PP-OCRv4_rec_train.tar && rm -rf en_PP-OCRv4_rec_train.tar
 cd ..
 
 
