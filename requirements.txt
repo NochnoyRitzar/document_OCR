@@ -6,3 +6,5 @@ jupyter
 paddleocr==2.7.3
 paddlepaddle
 streamlit
+wandb
+python-dotenv

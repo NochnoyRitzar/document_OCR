@@ -1,4 +1,5 @@
 import os
+import subprocess
 import pandas as pd
 
 
@@ -43,3 +44,28 @@ def replace_chars(text):
     text = text.replace("–", "-")
     text = text.replace("ο", "o")
     return text
+
+
+def inference_model_exists(model_dir: str) -> bool:
+    """
+    Check if the inference model exists
+    :param model_dir: path to the model directory
+    :return: True if the model exists, False otherwise
+    """
+    return os.path.exists(os.path.join(model_dir, "inference.pdiparams"))
+
+
+def export_inference_model(model_dir: str):
+    """
+    Export the inference model
+    :param model_dir: path to the model directory
+    """
+    subprocess.run(
+        [
+            "python", "./PaddleOCR/tools/export_model.py",
+            "-c", f"{os.path.join(model_dir, 'config.yml')}",
+            "-o", f"Global.checkpoints={model_dir}/best_accuracy",
+            "-o", f"Global.save_inference_dir={model_dir}"
+        ],
+        shell=True
+    )
