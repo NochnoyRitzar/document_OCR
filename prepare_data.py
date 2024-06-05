@@ -3,7 +3,7 @@ import json
 import random
 import shutil
 from PIL import Image
-from utils import get_split_files
+from utils import get_split_files, create_df_from_txt, replace_chars
 
 random.seed(42)
 
@@ -84,7 +84,7 @@ def convert_funsd_to_paddleocr_format(input_dir, output_file):
 
 def create_text_rec_dataset(dataset_path, split):
     output_path = os.path.join(dataset_path, split, "rec")
-    annotations_output_file = os.path.join(dataset_path, split, "rec_gt_train.txt")
+    annotations_output_file = os.path.join(dataset_path, split, f"rec_gt_{split}.txt")
     os.makedirs(output_path, exist_ok=True)
 
     counter = 1
@@ -106,37 +106,70 @@ def create_text_rec_dataset(dataset_path, split):
                 data = json.load(file)
 
             for text_instance in data["form"]:
-                # Crop and save the image based on the box coordinates
-                box = text_instance["box"]
-                x1, y1, x2, y2 = box
-                cropped_image = image.crop((x1, y1, x2, y2))
-                cropped_image_file_name = (
-                    f"{os.path.splitext(image_file_name)[0]}_{counter:03d}.png"
-                )
-                cropped_image_file_path = os.path.join(
-                    output_path, cropped_image_file_name
-                )
-                cropped_image.save(cropped_image_file_path)
+                for word in text_instance["words"]:
+                    # Crop and save the image based on the box coordinates
+                    box = word["box"]
+                    x1, y1, x2, y2 = box
+                    cropped_image = image.crop((x1, y1, x2, y2))
+                    cropped_image_file_name = (
+                        f"{os.path.splitext(image_file_name)[0]}_{counter:03d}.png"
+                    )
+                    cropped_image_file_path = os.path.join(
+                        output_path, cropped_image_file_name
+                    )
+                    cropped_image.save(cropped_image_file_path)
 
-                ann_file.write(f"{cropped_image_file_path}\t{text_instance['text']}\n")
-                counter += 1
+                    ann_file.write(f"{cropped_image_file_path}\t{word['text']}\n")
+                    counter += 1
 
     print(f"Successfully created text recognition {split} split")
 
 
+def clean_text_rec_dataset(df):
+    df = df.loc[~df["text"].str.contains("\uf702")]
+    df = df.loc[~df["text"].str.contains("\uf703")]
+    df = df.loc[~df["text"].str.contains("ü")]
+    df = df.loc[~df["text"].str.contains("á")]
+    df = df.loc[~df["text"].str.contains("°")]
+    df["text"] = df["text"].apply(replace_chars)
+
+    return df
+
+
 if __name__ == "__main__":
     dataset_dir = "dataset"
-    create_valid_split(dataset_dir)
+    # create_valid_split(dataset_dir)
+    #
+    # train_input_dir = os.path.join(dataset_dir, "train", "annotations")
+    # train_output_file = os.path.join(dataset_dir, "train", "annotations.txt")
+    # convert_funsd_to_paddleocr_format(train_input_dir, train_output_file)
+    #
+    # valid_input_dir = os.path.join(dataset_dir, "validation", "annotations")
+    # valid_output_file = os.path.join(dataset_dir, "validation", "annotations.txt")
+    # convert_funsd_to_paddleocr_format(valid_input_dir, valid_output_file)
+    #
+    # create_text_rec_dataset(dataset_dir, split="train")
+    # create_text_rec_dataset(dataset_dir, split="validation")
 
-    train_input_dir = os.path.join(dataset_dir, "train", "annotations")
-    train_output_file = os.path.join(dataset_dir, "train", "annotations.txt")
-    convert_funsd_to_paddleocr_format(train_input_dir, train_output_file)
+    train_df = create_df_from_txt("dataset/train/rec_gt_train.txt", "train")
+    val_df = create_df_from_txt("dataset/validation/rec_gt_validation.txt", "validation")
 
-    valid_input_dir = os.path.join(dataset_dir, "validation", "annotations")
-    valid_output_file = os.path.join(dataset_dir, "validation", "annotations.txt")
-    convert_funsd_to_paddleocr_format(valid_input_dir, valid_output_file)
+    train_df = clean_text_rec_dataset(train_df)
+    val_df = clean_text_rec_dataset(val_df)
 
-    create_text_rec_dataset(dataset_dir, split="train")
-    create_text_rec_dataset(dataset_dir, split="validation")
+    train_df[["origin", "text"]].to_csv(
+        "dataset/train/rec_gt_train_cleaned.txt",
+        sep="\t",
+        header=None,
+        index=None,
+        encoding="utf-8"
+    )
+    val_df[["origin", "text"]].to_csv(
+        "dataset/validation/rec_gt_validation_cleaned.txt",
+        sep="\t",
+        header=None,
+        index=None,
+        encoding="utf-8"
+    )
 
     print("Data preparation completed.")
