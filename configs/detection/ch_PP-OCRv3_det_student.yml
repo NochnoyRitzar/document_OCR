@@ -1,18 +1,13 @@
 Global:
   debug: false
   use_gpu: true
-  epoch_num: 100
+  epoch_num: 50
   log_smooth_window: 20
-  print_batch_step: 1
+  print_batch_step: 30
   save_model_dir: ./finetuning_results/ch_PP-OCR_V3_det/
-  save_epoch_step: 10
-  eval_batch_step:
-  - 0
-  - 10
-  - 20
-  - 50
-  - 100
-  cal_metric_during_train: true
+  save_epoch_step: 90
+  eval_batch_step: [0, 30] # evaluation is run every 30 iterations
+  cal_metric_during_train: false
   pretrained_model: ./pretrained_models/en_PP-OCRv3_det_distill_train/student.pdparams
   checkpoints: null
   save_inference_dir: null
