@@ -138,18 +138,18 @@ def clean_text_rec_dataset(df):
 
 if __name__ == "__main__":
     dataset_dir = "dataset"
-    # create_valid_split(dataset_dir)
-    #
-    # train_input_dir = os.path.join(dataset_dir, "train", "annotations")
-    # train_output_file = os.path.join(dataset_dir, "train", "annotations.txt")
-    # convert_funsd_to_paddleocr_format(train_input_dir, train_output_file)
-    #
-    # valid_input_dir = os.path.join(dataset_dir, "validation", "annotations")
-    # valid_output_file = os.path.join(dataset_dir, "validation", "annotations.txt")
-    # convert_funsd_to_paddleocr_format(valid_input_dir, valid_output_file)
-    #
-    # create_text_rec_dataset(dataset_dir, split="train")
-    # create_text_rec_dataset(dataset_dir, split="validation")
+    create_valid_split(dataset_dir)
+
+    train_input_dir = os.path.join(dataset_dir, "train", "annotations")
+    train_output_file = os.path.join(dataset_dir, "train", "annotations.txt")
+    convert_funsd_to_paddleocr_format(train_input_dir, train_output_file)
+
+    valid_input_dir = os.path.join(dataset_dir, "validation", "annotations")
+    valid_output_file = os.path.join(dataset_dir, "validation", "annotations.txt")
+    convert_funsd_to_paddleocr_format(valid_input_dir, valid_output_file)
+
+    create_text_rec_dataset(dataset_dir, split="train")
+    create_text_rec_dataset(dataset_dir, split="validation")
 
     train_df = create_df_from_txt("dataset/train/rec_gt_train.txt", "train")
     val_df = create_df_from_txt("dataset/validation/rec_gt_validation.txt", "validation")
